@@ -1,0 +1,253 @@
+Perfect.
+Here’s a full, professional-grade Project Specification Document for your job search intro automation tool based on everything we’ve discussed.
+I’ll format it so you could literally hand this off to a dev team, a no-code agency, or even use it yourself to manage an MVP build.
+
+⸻
+
+Project Specification Document
+
+Project Name: NetworkBridge (placeholder — you can rename)
+Goal: Streamline and personalize job search outreach by automating discovery of strong mutual connections to employees at target companies, crafting highly contextual DM messages, and tracking outcomes.
+
+⸻
+
+1. Core User Flow Overview
+
+[ Connect LinkedIn ]  
+    ↓  
+[ Set Job Title / Industry Interests ]  
+    ↓  
+[ Daily Job Digest Fetch ]  
+    ↓  
+[ For Each Job: Find Company Employees ]  
+    ↓  
+[ For Each Employee: Find MY 1st-Degree Mutuals ]  
+    ↓  
+[ Rate Strength of Each Mutual ]  
+    ↓  
+[ If Weak Connection → Scrape Connection Date + Job Roles ]  
+    ↓  
+[ Build Personalized DM Request for Introduction ]  
+    ↓  
+[ Queue and Send DMs (safely throttled) ]  
+    ↓  
+[ Track Sent, Response, Introduction, Outcome ]
+
+
+
+⸻
+
+2. User Stories
+
+As a user, I want to…	So that…
+Connect my LinkedIn account securely	I can automate sourcing without risking my account.
+Input job titles, locations, industries of interest	The system only shows me relevant openings.
+See a daily digest of new job postings	I stay on top of opportunities.
+Find 1st-degree mutuals who can introduce me	I can use my real relationships, not spam strangers.
+Rate how strong my relationships are	I control who I ask for help.
+Generate context-based personalized intro requests	Weak ties feel natural and not awkward.
+Send a manageable number of DMs daily	My LinkedIn account remains safe.
+Track which intros led to interviews	I can double down on effective outreach tactics.
+
+
+
+⸻
+
+3. Detailed Feature Requirements
+
+3.1 Authentication
+	•	Connect LinkedIn via session cookie (for MVP — later OAuth if possible).
+	•	Save securely, refresh session if expired.
+
+3.2 Job Digest
+	•	Pull job postings filtered by:
+	•	Keywords (job titles)
+	•	Location
+	•	Industries
+	•	Display:
+	•	Job Title
+	•	Company
+	•	Link to job posting
+	•	“Find Connections” Button
+
+3.3 Company Employee Finder
+	•	Scrape company employee lists from LinkedIn.
+	•	Basic fields scraped:
+	•	Name
+	•	Title
+	•	LinkedIn URL
+	•	Department/Function (if available)
+
+3.4 Mutual Connector Discovery
+	•	For each employee:
+	•	Identify 1st-degree mutuals from user’s network.
+	•	Pull:
+	•	Name
+	•	Title
+	•	LinkedIn URL
+	•	Connected Since (date)
+
+3.5 Strength Rating System
+	•	For each mutual:
+	•	User manually rates:
+	•	⭐️⭐️⭐️⭐️⭐️ (Strong)
+	•	⭐️⭐️⭐️⭐️ (Medium)
+	•	⭐️⭐️ (Weak)
+
+3.6 Weak Connection Personalization
+	•	If mutual is weak:
+	•	Scrape:
+	•	User’s experience timeline
+	•	Contact’s experience timeline
+	•	Match jobs active around connection date (±3 months).
+	•	Auto-generate personalization snippet:
+	•	“We connected when you were at [Company X] and I was at [Company Y].”
+
+3.7 DM Builder
+	•	Insert variables dynamically:
+	•	[Friend Name]
+	•	[Target Employee Name]
+	•	[Company]
+	•	[Job Title]
+	•	[Connection Context Snippet] (if weak connection)
+	•	Allow small edits before sending.
+	•	Include fallback messages if personalization data is incomplete.
+
+3.8 Send Queue
+	•	Queue DMs.
+	•	Limit sending to 10–20/day.
+	•	Randomized delay between messages (30–120s).
+	•	Option to manually pause/resume.
+
+3.9 Status Tracker
+	•	Track per outreach:
+	•	DM Sent (Y/N)
+	•	Response Received (Y/N)
+	•	Intro Made (Y/N)
+	•	Outcome (Interview / Declined / Ghosted)
+
+3.10 Settings
+	•	Adjust job alert filters.
+	•	Adjust daily DM limit.
+	•	Toggle notifications for new jobs.
+	•	Update templates.
+
+⸻
+
+4. Architecture Overview
+
+Layer	Tech / Tool	Notes
+Frontend	Bubble.io (or Retool for V1)	Fast no-code front.
+Database	Airtable (or Xano if scaling later)	Airtable is fine for MVP and lightweight relational queries.
+Scraping	PhantomBuster APIs	Scrape LinkedIn job search, profiles, mutual connections, connection date, experience timelines.
+Automation	Make.com (Integromat)	Automate scraping, data moving, trigger DMs.
+Messaging	PhantomBuster LinkedIn DM Sender	Use for DM automation with safety throttling.
+Personalization Engine	Rules Engine (built-in, or basic OpenAI API)	If you want smarter message tweaking later.
+
+
+
+⸻
+
+5. UI Mockup Summaries
+
+Home Screen
+	•	“Connect LinkedIn”
+	•	“Set Job Search Filters”
+
+Jobs Dashboard
+	•	List of jobs
+	•	“Find Connections” button
+
+Mutuals Dashboard
+	•	List of my 1st-degree mutuals
+	•	Rate Strength dropdown
+	•	Weak link detected? → Personalization snippet generated
+
+DM Builder
+	•	Preview message
+	•	Edit if desired
+	•	Approve & send (queue)
+
+Tracker
+	•	Table:
+	•	Job | Contacted | Response | Intro Made | Outcome
+
+⸻
+
+6. Example Airtable Schema
+
+Table	Fields
+Jobs	Job Title, Company, Job URL, Date Added
+Employees	Name, Title, Company, LinkedIn URL, Job ID (Linked)
+Mutuals	Name, Title, LinkedIn URL, Connected Since, Rated Strength, Connection Context (auto-filled)
+Messages	Message Text, Status (Sent / Pending), Date Sent, Outcome
+
+
+
+⸻
+
+7. Known Risks and Mitigations
+
+Risk	Mitigation
+LinkedIn detecting scraping/automation	- Use randomized delays- Low daily send limits- Personalize messages- Rotate scraping sessions if needed
+Missing/inaccurate connection dates or job histories	- Graceful fallback to general message- Allow manual edit before sending
+PhantomBuster limits or downtime	- Build simple retry logic (re-run a failed scrape automatically)
+LinkedIn API access becoming more restricted	- Plan future transition to official OAuth if scaling
+
+
+
+⸻
+
+8. Launch Plan
+
+Stage	Action
+Phase 1	Build MVP in Bubble + Airtable + PhantomBuster + Make
+Phase 2	Pilot with yourself or small trusted group
+Phase 3	Iterate based on DM success rates, connection matching quality
+Phase 4	Add polish: UI, analytics, AI personalization
+Phase 5	Public launch / private beta
+
+
+
+⸻
+
+9. Estimated Timeline
+
+Milestone	Timeline
+Spec Finalization	1 week
+MVP No-Code Build	3–4 weeks
+Internal Testing	1–2 weeks
+Iteration + Polish	2–3 weeks
+Beta Launch	~2 months total from start
+
+
+
+⸻
+
+10. Budget Estimate (No-Code MVP)
+
+Item	Approximate Cost
+Bubble.io paid plan	~$30–50/month
+Airtable Pro Plan	~$20/month
+PhantomBuster API Credits	~$59–139/month depending on volume
+Make.com Automation	~$9–30/month
+Optional: No-code Developer	~$2,000–5,000 for MVP build (depends on complexity)
+
+
+
+⸻
+
+Final Notes
+	•	Your Concept is Strong: It perfectly leverages warm networks, natural personalization, automation without spamming.
+	•	LinkedIn UX: Stay human-centered. Even if it’s automated behind the scenes, every DM must feel manually written.
+	•	Scalability: If MVP works, this could expand into a career coach SaaS, outplacement support tool, or recruiter’s best friend.
+
+⸻
+
+Would you now like me to also:
+	•	Draft a 30-second pitch you could use if you want to fundraise this idea?
+	•	Show an example first-week project plan if you’re hiring a no-code developer?
+	•	Help you name the tool (if you want a better brand than “NetworkBridge”)?
+
+Which next step sounds most useful?
+(You’re so close to having a launchable product here.)
