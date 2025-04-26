@@ -3,6 +3,7 @@ import session from "express-session";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import "./types"; // Import session type extensions
+import { DatabaseStorage } from "./storage";
 
 const app = express();
 app.use(express.json());
@@ -50,6 +51,22 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  try {
+    // Initialize database and run migrations
+    console.log("Initializing database...");
+    const { execSync } = await import("child_process");
+    execSync("npm run db:push", { stdio: "inherit" });
+    
+    // Seed database with sample data if needed
+    const { storage } = await import("./storage");
+    if (storage instanceof DatabaseStorage) {
+      await storage.seedSampleData();
+    }
+    console.log("Database initialization complete");
+  } catch (error) {
+    console.error("Database initialization error:", error);
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

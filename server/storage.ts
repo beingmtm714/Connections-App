@@ -18,6 +18,7 @@ import {
   Message,
   InsertMessage
 } from "@shared/schema";
+import { eq, ne, and, count } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -472,4 +473,532 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export class DatabaseStorage implements IStorage {
+  async getUser(id: number): Promise<User | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user || undefined;
+    } catch (error) {
+      console.error("Database error in getUser:", error);
+      throw error;
+    }
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [user] = await db.select().from(users).where(eq(users.username, username));
+      return user || undefined;
+    } catch (error) {
+      console.error("Database error in getUserByUsername:", error);
+      throw error;
+    }
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      const { db } = await import("./db");
+      const [user] = await db.insert(users).values(insertUser).returning();
+      return user;
+    } catch (error) {
+      console.error("Database error in createUser:", error);
+      throw error;
+    }
+  }
+
+  async updateUser(id: number, data: Partial<InsertUser>): Promise<User | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [updatedUser] = await db
+        .update(users)
+        .set(data)
+        .where(eq(users.id, id))
+        .returning();
+      return updatedUser || undefined;
+    } catch (error) {
+      console.error("Database error in updateUser:", error);
+      throw error;
+    }
+  }
+
+  async getJobPreferences(userId: number): Promise<JobPreferences | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [preferences] = await db
+        .select()
+        .from(jobPreferences)
+        .where(eq(jobPreferences.userId, userId));
+      return preferences || undefined;
+    } catch (error) {
+      console.error("Database error in getJobPreferences:", error);
+      throw error;
+    }
+  }
+
+  async createJobPreferences(preferences: InsertJobPreferences): Promise<JobPreferences> {
+    try {
+      const { db } = await import("./db");
+      const [newPreferences] = await db
+        .insert(jobPreferences)
+        .values(preferences)
+        .returning();
+      return newPreferences;
+    } catch (error) {
+      console.error("Database error in createJobPreferences:", error);
+      throw error;
+    }
+  }
+
+  async updateJobPreferences(id: number, data: Partial<InsertJobPreferences>): Promise<JobPreferences | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [updatedPreferences] = await db
+        .update(jobPreferences)
+        .set(data)
+        .where(eq(jobPreferences.id, id))
+        .returning();
+      return updatedPreferences || undefined;
+    } catch (error) {
+      console.error("Database error in updateJobPreferences:", error);
+      throw error;
+    }
+  }
+
+  async getJobs(options?: { userId?: number; limit?: number }): Promise<Job[]> {
+    try {
+      const { db } = await import("./db");
+      let query = db.select().from(jobs);
+
+      if (options?.userId) {
+        query = query.where(eq(jobs.userId, options.userId));
+      }
+
+      const result = await query;
+      
+      // Apply limit in memory if provided
+      if (options?.limit && result.length > options.limit) {
+        return result.slice(0, options.limit);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Database error in getJobs:", error);
+      throw error;
+    }
+  }
+
+  async getJob(id: number): Promise<Job | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [job] = await db.select().from(jobs).where(eq(jobs.id, id));
+      return job || undefined;
+    } catch (error) {
+      console.error("Database error in getJob:", error);
+      throw error;
+    }
+  }
+
+  async createJob(job: InsertJob): Promise<Job> {
+    try {
+      const { db } = await import("./db");
+      const [newJob] = await db.insert(jobs).values(job).returning();
+      return newJob;
+    } catch (error) {
+      console.error("Database error in createJob:", error);
+      throw error;
+    }
+  }
+
+  async getEmployees(jobId: number): Promise<Employee[]> {
+    try {
+      const { db } = await import("./db");
+      return await db
+        .select()
+        .from(employees)
+        .where(eq(employees.jobId, jobId));
+    } catch (error) {
+      console.error("Database error in getEmployees:", error);
+      throw error;
+    }
+  }
+
+  async createEmployee(employee: InsertEmployee): Promise<Employee> {
+    try {
+      const { db } = await import("./db");
+      const [newEmployee] = await db
+        .insert(employees)
+        .values(employee)
+        .returning();
+      return newEmployee;
+    } catch (error) {
+      console.error("Database error in createEmployee:", error);
+      throw error;
+    }
+  }
+
+  async getMutuals(options: { userId: number; employeeId?: number }): Promise<Mutual[]> {
+    try {
+      const { db } = await import("./db");
+      let query = db
+        .select()
+        .from(mutuals)
+        .where(eq(mutuals.userId, options.userId));
+
+      if (options.employeeId) {
+        query = query.where(eq(mutuals.employeeId, options.employeeId));
+      }
+
+      return await query;
+    } catch (error) {
+      console.error("Database error in getMutuals:", error);
+      throw error;
+    }
+  }
+
+  async getMutual(id: number): Promise<Mutual | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [mutual] = await db.select().from(mutuals).where(eq(mutuals.id, id));
+      return mutual || undefined;
+    } catch (error) {
+      console.error("Database error in getMutual:", error);
+      throw error;
+    }
+  }
+
+  async createMutual(mutual: InsertMutual): Promise<Mutual> {
+    try {
+      const { db } = await import("./db");
+      const [newMutual] = await db.insert(mutuals).values(mutual).returning();
+      return newMutual;
+    } catch (error) {
+      console.error("Database error in createMutual:", error);
+      throw error;
+    }
+  }
+
+  async updateMutual(id: number, data: Partial<InsertMutual>): Promise<Mutual | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [updatedMutual] = await db
+        .update(mutuals)
+        .set(data)
+        .where(eq(mutuals.id, id))
+        .returning();
+      return updatedMutual || undefined;
+    } catch (error) {
+      console.error("Database error in updateMutual:", error);
+      throw error;
+    }
+  }
+
+  async getMessages(options?: { userId?: number; mutualId?: number; limit?: number }): Promise<Message[]> {
+    try {
+      const { db } = await import("./db");
+      let query = db.select().from(messages);
+
+      if (options?.userId) {
+        query = query.where(eq(messages.userId, options.userId));
+      }
+
+      if (options?.mutualId) {
+        query = query.where(eq(messages.mutualId, options.mutualId));
+      }
+
+      const result = await query;
+      
+      // Apply limit in memory if provided
+      if (options?.limit && result.length > options.limit) {
+        return result.slice(0, options.limit);
+      }
+      
+      return result;
+    } catch (error) {
+      console.error("Database error in getMessages:", error);
+      throw error;
+    }
+  }
+
+  async getMessage(id: number): Promise<Message | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [message] = await db
+        .select()
+        .from(messages)
+        .where(eq(messages.id, id));
+      return message || undefined;
+    } catch (error) {
+      console.error("Database error in getMessage:", error);
+      throw error;
+    }
+  }
+
+  async createMessage(message: InsertMessage): Promise<Message> {
+    try {
+      const { db } = await import("./db");
+      const [newMessage] = await db
+        .insert(messages)
+        .values(message)
+        .returning();
+      return newMessage;
+    } catch (error) {
+      console.error("Database error in createMessage:", error);
+      throw error;
+    }
+  }
+
+  async updateMessage(id: number, data: Partial<InsertMessage>): Promise<Message | undefined> {
+    try {
+      const { db } = await import("./db");
+      const [updatedMessage] = await db
+        .update(messages)
+        .set(data)
+        .where(eq(messages.id, id))
+        .returning();
+      return updatedMessage || undefined;
+    } catch (error) {
+      console.error("Database error in updateMessage:", error);
+      throw error;
+    }
+  }
+
+  async getDashboardStats(userId: number): Promise<{
+    jobsCount: number;
+    mutualsCount: number;
+    messagesSentCount: number;
+    introductionsMadeCount: number;
+  }> {
+    try {
+      const { db } = await import("./db");
+      
+      // Get count of jobs for the user
+      const jobsResult = await db
+        .select({ count: count() })
+        .from(jobs)
+        .where(eq(jobs.userId, userId));
+      const jobsCount = jobsResult[0]?.count || 0;
+      
+      // Get count of mutuals for the user
+      const mutualsResult = await db
+        .select({ count: count() })
+        .from(mutuals)
+        .where(eq(mutuals.userId, userId));
+      const mutualsCount = mutualsResult[0]?.count || 0;
+      
+      // Get count of messages sent for the user (not pending)
+      const messagesSentResult = await db
+        .select({ count: count() })
+        .from(messages)
+        .where(and(eq(messages.userId, userId), ne(messages.status, 'pending')));
+      const messagesSentCount = messagesSentResult[0]?.count || 0;
+      
+      // Get count of introductions made for the user
+      const introsMadeResult = await db
+        .select({ count: count() })
+        .from(messages)
+        .where(and(eq(messages.userId, userId), eq(messages.status, 'intro_made')));
+      const introductionsMadeCount = introsMadeResult[0]?.count || 0;
+      
+      return {
+        jobsCount,
+        mutualsCount,
+        messagesSentCount,
+        introductionsMadeCount
+      };
+    } catch (error) {
+      console.error("Database error in getDashboardStats:", error);
+      throw error;
+    }
+  }
+
+  // Add seed data function for initial application state
+  async seedSampleData(): Promise<void> {
+    try {
+      const { db } = await import("./db");
+      
+      // Check if there's already data
+      const userCount = await db.select({ count: count() }).from(users);
+      if (userCount[0]?.count > 0) {
+        console.log("Database already has data, skipping seeding.");
+        return;
+      }
+      
+      // Create sample user
+      const [user] = await db.insert(users).values({
+        username: "user@example.com",
+        password: "password", // In a real app, this would be hashed
+        firstName: "John",
+        lastName: "Smith",
+        linkedInConnected: true,
+        linkedInSessionCookie: "sample_session_cookie"
+      }).returning();
+      
+      // Create job preferences
+      await db.insert(jobPreferences).values({
+        userId: user.id,
+        desiredRole: "Software Engineer",
+        desiredLocation: "San Francisco, CA",
+        desiredSalary: 150000,
+        remotePreference: "remote",
+        industryPreferences: ["Technology", "Finance", "Healthcare"],
+        companySizePreference: "startup"
+      });
+      
+      // Create jobs
+      const [job1] = await db.insert(jobs).values({
+        userId: user.id,
+        title: "Senior Software Engineer",
+        company: "Airbnb",
+        location: "San Francisco, CA",
+        description: "Looking for a senior engineer to join our platform team",
+        salaryRange: "$150K - $200K",
+        remote: true,
+        applicationUrl: "https://airbnb.com/careers",
+        status: "interested",
+        notes: "Referred by Michael",
+        dateAdded: new Date().toISOString()
+      }).returning();
+      
+      const [job2] = await db.insert(jobs).values({
+        userId: user.id,
+        title: "Full Stack Developer",
+        company: "Shopify",
+        location: "Remote",
+        description: "Join our team building the future of e-commerce",
+        salaryRange: "$120K - $160K",
+        remote: true,
+        applicationUrl: "https://shopify.com/careers",
+        status: "applied",
+        notes: "Applied on LinkedIn",
+        dateAdded: new Date().toISOString()
+      }).returning();
+      
+      const [job3] = await db.insert(jobs).values({
+        userId: user.id,
+        title: "Engineering Manager",
+        company: "Stripe",
+        location: "New York, NY",
+        description: "Lead a team of talented engineers",
+        salaryRange: "$180K - $220K",
+        remote: false,
+        applicationUrl: "https://stripe.com/careers",
+        status: "interviewing",
+        notes: "First interview on Friday",
+        dateAdded: new Date().toISOString()
+      }).returning();
+      
+      // Create employees
+      const [employee1] = await db.insert(employees).values({
+        jobId: job1.id,
+        name: "Julia Chen",
+        title: "Engineering Manager",
+        linkedInUrl: "https://linkedin.com/in/juliachen",
+        notes: "Hiring manager for the position"
+      }).returning();
+      
+      const [employee2] = await db.insert(employees).values({
+        jobId: job1.id,
+        name: "Alex Rodriguez",
+        title: "Senior Software Engineer",
+        linkedInUrl: "https://linkedin.com/in/alexrodriguez",
+        notes: "Would be a peer on the team"
+      }).returning();
+      
+      const [employee3] = await db.insert(employees).values({
+        jobId: job2.id,
+        name: "David Kim",
+        title: "Senior Product Designer",
+        linkedInUrl: "https://linkedin.com/in/davidkim",
+        notes: "Works closely with engineering"
+      }).returning();
+      
+      const [employee4] = await db.insert(employees).values({
+        jobId: job3.id,
+        name: "Sarah Smith",
+        title: "Tech Lead",
+        linkedInUrl: "https://linkedin.com/in/sarahsmith",
+        notes: "Technical interviewer"
+      }).returning();
+      
+      // Create mutuals
+      const [mutual1] = await db.insert(mutuals).values({
+        userId: user.id,
+        employeeId: employee1.id,
+        name: "Michael Roberts",
+        title: "Product Manager",
+        company: "Google",
+        linkedInUrl: "https://linkedin.com/in/michaelroberts",
+        relationshipStrength: 4,
+        lastContactDate: new Date(new Date().setDate(new Date().getDate() - 15)).toISOString(),
+        notes: "Former coworker at Google, still in touch"
+      }).returning();
+      
+      const [mutual2] = await db.insert(mutuals).values({
+        userId: user.id,
+        employeeId: employee2.id,
+        name: "Jessica Wilson",
+        title: "Design Lead",
+        company: "Facebook",
+        linkedInUrl: "https://linkedin.com/in/jessicawilson",
+        relationshipStrength: 3,
+        lastContactDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
+        notes: "Met at design conference last year"
+      }).returning();
+      
+      const [mutual3] = await db.insert(mutuals).values({
+        userId: user.id,
+        employeeId: employee3.id,
+        name: "Thomas Jackson",
+        title: "Software Engineer",
+        company: "Amazon",
+        linkedInUrl: "https://linkedin.com/in/thomasjackson",
+        relationshipStrength: 5,
+        lastContactDate: new Date(new Date().setDate(new Date().getDate() - 5)).toISOString(),
+        notes: "College roommate, very close friend"
+      }).returning();
+      
+      // Create messages
+      await db.insert(messages).values({
+        userId: user.id,
+        mutualId: mutual1.id,
+        employeeId: employee1.id,
+        content: "Hey Michael, hope you're doing well! I noticed you're connected with Julia Chen at Airbnb. I'm interested in the Senior Software Engineer role there. Would you be comfortable introducing us?",
+        status: "sent",
+        sentDate: new Date(new Date().setDate(new Date().getDate() - 10)).toISOString(),
+        responseDate: new Date(new Date().setDate(new Date().getDate() - 8)).toISOString(),
+        outcome: "pending"
+      });
+      
+      await db.insert(messages).values({
+        userId: user.id,
+        mutualId: mutual2.id,
+        employeeId: employee2.id,
+        content: "Hi Jessica, I hope everything is great with you! I saw you're connected with Alex at Airbnb. I'm applying for the Senior Software Engineer position there and would love an introduction if you're comfortable with that.",
+        status: "responded",
+        sentDate: new Date(new Date().setDate(new Date().getDate() - 20)).toISOString(),
+        responseDate: new Date(new Date().setDate(new Date().getDate() - 18)).toISOString(),
+        outcome: "interview"
+      });
+      
+      await db.insert(messages).values({
+        userId: user.id,
+        mutualId: mutual3.id,
+        employeeId: employee3.id,
+        content: "Thomas! Long time no chat. I saw you're connected with David at Shopify. I'm really interested in their Full Stack Developer position. Would you mind introducing us?",
+        status: "intro_made",
+        sentDate: new Date(new Date().setDate(new Date().getDate() - 30)).toISOString(),
+        responseDate: new Date(new Date().setDate(new Date().getDate() - 28)).toISOString(),
+        outcome: "interview"
+      });
+      
+      console.log("Database seeded successfully with sample data.");
+    } catch (error) {
+      console.error("Error seeding database:", error);
+      throw error;
+    }
+  }
+}
+
+// Use the DatabaseStorage for persistence
+export const storage = new DatabaseStorage();
