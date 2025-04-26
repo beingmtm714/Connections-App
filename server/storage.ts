@@ -837,55 +837,40 @@ export class DatabaseStorage implements IStorage {
       // Create job preferences
       await db.insert(jobPreferences).values({
         userId: user.id,
-        desiredRole: "Software Engineer",
-        desiredLocation: "San Francisco, CA",
-        desiredSalary: 150000,
-        remotePreference: "remote",
-        industryPreferences: ["Technology", "Finance", "Healthcare"],
-        companySizePreference: "startup"
+        jobTitles: ["Software Engineer", "Full Stack Developer", "Frontend Engineer"],
+        locations: ["San Francisco, CA", "New York, NY", "Remote"],
+        industries: ["Technology", "Finance", "Healthcare"]
       });
       
       // Create jobs
       const [job1] = await db.insert(jobs).values({
-        userId: user.id,
         title: "Senior Software Engineer",
         company: "Airbnb",
         location: "San Francisco, CA",
-        description: "Looking for a senior engineer to join our platform team",
-        salaryRange: "$150K - $200K",
-        remote: true,
-        applicationUrl: "https://airbnb.com/careers",
-        status: "interested",
-        notes: "Referred by Michael",
-        dateAdded: new Date().toISOString()
+        jobUrl: "https://airbnb.com/careers",
+        postedDate: new Date(),
+        logoUrl: "https://logo.clearbit.com/airbnb.com",
+        isNew: true
       }).returning();
       
       const [job2] = await db.insert(jobs).values({
-        userId: user.id,
         title: "Full Stack Developer",
         company: "Shopify",
         location: "Remote",
-        description: "Join our team building the future of e-commerce",
-        salaryRange: "$120K - $160K",
-        remote: true,
-        applicationUrl: "https://shopify.com/careers",
-        status: "applied",
-        notes: "Applied on LinkedIn",
-        dateAdded: new Date().toISOString()
+        jobUrl: "https://shopify.com/careers",
+        postedDate: new Date(),
+        logoUrl: "https://logo.clearbit.com/shopify.com",
+        isNew: true
       }).returning();
       
       const [job3] = await db.insert(jobs).values({
-        userId: user.id,
         title: "Engineering Manager",
         company: "Stripe",
         location: "New York, NY",
-        description: "Lead a team of talented engineers",
-        salaryRange: "$180K - $220K",
-        remote: false,
-        applicationUrl: "https://stripe.com/careers",
-        status: "interviewing",
-        notes: "First interview on Friday",
-        dateAdded: new Date().toISOString()
+        jobUrl: "https://stripe.com/careers",
+        postedDate: new Date(),
+        logoUrl: "https://logo.clearbit.com/stripe.com",
+        isNew: true
       }).returning();
       
       // Create employees
@@ -894,7 +879,7 @@ export class DatabaseStorage implements IStorage {
         name: "Julia Chen",
         title: "Engineering Manager",
         linkedInUrl: "https://linkedin.com/in/juliachen",
-        notes: "Hiring manager for the position"
+        department: "Engineering"
       }).returning();
       
       const [employee2] = await db.insert(employees).values({
@@ -902,7 +887,7 @@ export class DatabaseStorage implements IStorage {
         name: "Alex Rodriguez",
         title: "Senior Software Engineer",
         linkedInUrl: "https://linkedin.com/in/alexrodriguez",
-        notes: "Would be a peer on the team"
+        department: "Engineering"
       }).returning();
       
       const [employee3] = await db.insert(employees).values({
@@ -910,7 +895,7 @@ export class DatabaseStorage implements IStorage {
         name: "David Kim",
         title: "Senior Product Designer",
         linkedInUrl: "https://linkedin.com/in/davidkim",
-        notes: "Works closely with engineering"
+        department: "Design"
       }).returning();
       
       const [employee4] = await db.insert(employees).values({
@@ -918,7 +903,7 @@ export class DatabaseStorage implements IStorage {
         name: "Sarah Smith",
         title: "Tech Lead",
         linkedInUrl: "https://linkedin.com/in/sarahsmith",
-        notes: "Technical interviewer"
+        department: "Engineering"
       }).returning();
       
       // Create mutuals
