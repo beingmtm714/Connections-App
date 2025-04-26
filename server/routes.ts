@@ -368,6 +368,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Career enhancement tools
+  app.post("/api/tools/resume", isAuthenticated, async (req, res) => {
+    try {
+      const { jobDescription } = req.body;
+      const user = await storage.getUser(req.session.userId);
+      
+      // Use OpenAI to generate SMART format resume
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "Generate a SMART (Specific, Measurable, Achievable, Relevant, Time-bound) format resume that will pass ATS systems."
+          },
+          {
+            role: "user",
+            content: `Job Description: ${jobDescription}\nUser Profile: ${JSON.stringify(user)}`
+          }
+        ]
+      });
+      
+      res.json({ content: completion.choices[0].message.content });
+    } catch (error) {
+      console.error("Resume generation error:", error);
+      res.status(500).json({ message: "Failed to generate resume" });
+    }
+  });
+
+  app.post("/api/tools/cover-letter", isAuthenticated, async (req, res) => {
+    try {
+      const { jobDescription } = req.body;
+      const user = await storage.getUser(req.session.userId);
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "Generate a personalized cover letter that will pass ATS systems."
+          },
+          {
+            role: "user",
+            content: `Job Description: ${jobDescription}\nUser Profile: ${JSON.stringify(user)}`
+          }
+        ]
+      });
+      
+      res.json({ content: completion.choices[0].message.content });
+    } catch (error) {
+      console.error("Cover letter generation error:", error);
+      res.status(500).json({ message: "Failed to generate cover letter" });
+    }
+  });
+
+  app.post("/api/tools/linkedin-profile", isAuthenticated, async (req, res) => {
+    try {
+      const user = await storage.getUser(req.session.userId);
+      
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: "Improve LinkedIn profile using SMART method to optimize visibility and pass screening algorithms."
+          },
+          {
+            role: "user",
+            content: `User Profile: ${JSON.stringify(user)}`
+          }
+        ]
+      });
+      
+      res.json({ content: completion.choices[0].message.content });
+    } catch (error) {
+      console.error("LinkedIn profile improvement error:", error);
+      res.status(500).json({ message: "Failed to improve LinkedIn profile" });
+    }
+  });
+
   // Dashboard stats
   app.get("/api/dashboard/stats", isAuthenticated, async (req, res) => {
     try {
