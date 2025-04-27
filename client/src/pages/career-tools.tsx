@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export default function CareerTools() {
   const { toast } = useToast();
   const [jobDescription, setJobDescription] = useState('');
+  const [generatedContent, setGeneratedContent] = useState('');
+  const [activeTab, setActiveTab] = useState('resume');
   
   const generateResume = useMutation({
     mutationFn: async () => {
@@ -21,6 +25,7 @@ export default function CareerTools() {
       return response.json();
     },
     onSuccess: (data) => {
+      setGeneratedContent(data.content);
       toast({ title: "Resume generated successfully" });
     }
   });
@@ -36,6 +41,7 @@ export default function CareerTools() {
       return response.json();
     },
     onSuccess: (data) => {
+      setGeneratedContent(data.content);
       toast({ title: "Cover letter generated successfully" });
     }
   });
@@ -50,72 +56,104 @@ export default function CareerTools() {
       return response.json();
     },
     onSuccess: (data) => {
+      setGeneratedContent(data.content);
       toast({ title: "LinkedIn profile improvements generated" });
     }
   });
+
+  const handleGenerate = () => {
+    switch(activeTab) {
+      case 'resume':
+        generateResume.mutate();
+        break;
+      case 'cover-letter':
+        generateCoverLetter.mutate();
+        break;
+      case 'linkedin':
+        improveLinkedIn.mutate();
+        break;
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([generatedContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${activeTab}-content.txt`;
+    a.click();
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       <h1 className="text-2xl font-bold">Career Enhancement Tools</h1>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Job Description</CardTitle>
-          <CardDescription>Paste the job description to generate optimized content</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            value={jobDescription}
-            onChange={(e) => setJobDescription(e.target.value)}
-            placeholder="Paste job description here..."
-            className="min-h-[200px]"
-          />
-        </CardContent>
-      </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Job Description</CardTitle>
+              <CardDescription>Paste the job description to generate optimized content</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                placeholder="Paste job description here..."
+                className="min-h-[200px]"
+              />
+            </CardContent>
+          </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>SMART Resume Generator</CardTitle>
-            <CardDescription>Generate an ATS-optimized resume</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => generateResume.mutate()}
-              disabled={!jobDescription || generateResume.isPending}
-            >
-              Generate Resume
-            </Button>
-          </CardContent>
-        </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Generate Content</CardTitle>
+              <CardDescription>Select the type of content to generate</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="resume">SMART Resume</TabsTrigger>
+                  <TabsTrigger value="cover-letter">Cover Letter</TabsTrigger>
+                  <TabsTrigger value="linkedin">LinkedIn Profile</TabsTrigger>
+                </TabsList>
+              </Tabs>
+              
+              <Button 
+                onClick={handleGenerate}
+                disabled={(!jobDescription && activeTab !== 'linkedin') || 
+                  generateResume.isPending || 
+                  generateCoverLetter.isPending || 
+                  improveLinkedIn.isPending}
+                className="w-full"
+              >
+                Generate Content
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
 
-        <Card>
+        <Card className="h-full">
           <CardHeader>
-            <CardTitle>Cover Letter Generator</CardTitle>
-            <CardDescription>Create a personalized cover letter</CardDescription>
+            <CardTitle>Generated Content</CardTitle>
+            <CardDescription>Preview your generated content</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => generateCoverLetter.mutate()}
-              disabled={!jobDescription || generateCoverLetter.isPending}
-            >
-              Generate Cover Letter
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>LinkedIn Profile Optimizer</CardTitle>
-            <CardDescription>Improve your profile with SMART method</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => improveLinkedIn.mutate()}
-              disabled={improveLinkedIn.isPending}
-            >
-              Improve Profile
-            </Button>
+          <CardContent className="h-full space-y-4">
+            <ScrollArea className="h-[500px] w-full rounded-md border p-4">
+              {generatedContent ? (
+                <div className="whitespace-pre-wrap">{generatedContent}</div>
+              ) : (
+                <div className="text-center text-gray-500 mt-8">
+                  Generated content will appear here
+                </div>
+              )}
+            </ScrollArea>
+            
+            {generatedContent && (
+              <Button onClick={handleExport} className="w-full">
+                Export Content
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
