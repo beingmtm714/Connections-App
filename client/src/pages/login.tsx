@@ -44,15 +44,25 @@ export default function Login() {
   const registerMutation = useMutation({
     mutationFn: async (data: FormData) => {
       const res = await apiRequest('POST', '/api/auth/register', data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Registration failed');
+      }
       return res.json();
     },
     onSuccess: () => {
-      window.location.href = '/';
+      toast({
+        title: "Account created",
+        description: "Welcome to NetworkBridge! Redirecting to dashboard...",
+      });
+      setTimeout(() => {
+        window.location.href = '/dashboard';
+      }, 1500);
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Registration failed",
-        description: error.message || "An account with this email may already exist.",
+        description: error.message || "Please try again later.",
         variant: "destructive"
       });
     }

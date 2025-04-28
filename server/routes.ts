@@ -56,10 +56,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user already exists
       const existingUser = await storage.getUserByUsername(userData.username);
       if (existingUser) {
-        return res.status(400).json({ message: "Username already taken" });
+        return res.status(400).json({ message: "An account with this email already exists" });
       }
       
-      const newUser = await storage.createUser(userData);
+      // Create user with default job title and name from email
+      const newUser = await storage.createUser({
+        ...userData,
+        name: userData.username.split('@')[0],
+        jobTitle: 'Job Seeker',
+        linkedInConnected: false
+      });
+      
+      if (!newUser || !newUser.id) {
+        throw new Error('Failed to create user account');
+      }
+
+      // Initialize job preferences
+      await storage.createJobPreferences({
+        userId: newUser.id,
+        jobTitles: [],
+        locations: [],
+        industries: []
+      });
       
       // Set user in session
       req.session.userId = newUser.id;
@@ -69,10 +87,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(201).json(userWithoutPassword);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+        return res.status(400).json({ 
+          message: "Please check your input",
+          errors: error.errors.map(e => e.message)
+        });
       }
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Server error" });
+      res.status(500).json({ message: "Unable to create account. Please try again." });
     }
   });
   
