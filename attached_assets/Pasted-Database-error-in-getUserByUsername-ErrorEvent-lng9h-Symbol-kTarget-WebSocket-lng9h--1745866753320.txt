@@ -1,0 +1,181 @@
+Database error in getUserByUsername: ErrorEvent {
+lng9h
+  [Symbol(kTarget)]: WebSocket {
+lng9h
+    _events: [Object: null prototype] {
+lng9h
+      error: [Function],
+lng9h
+      message: [Function],
+lng9h
+      close: [Function],
+lng9h
+      open: [Function]
+lng9h
+    },
+lng9h
+    _eventsCount: 4,
+lng9h
+    _maxListeners: undefined,
+lng9h
+    _binaryType: 'arraybuffer',
+lng9h
+    _closeCode: 1006,
+lng9h
+    _closeFrameReceived: false,
+lng9h
+    _closeFrameSent: false,
+lng9h
+    _closeMessage: <Buffer >,
+lng9h
+    _closeTimer: null,
+lng9h
+    _errorEmitted: true,
+lng9h
+    _extensions: {},
+lng9h
+    _paused: false,
+lng9h
+    _protocol: '',
+lng9h
+    _readyState: 3,
+lng9h
+    _receiver: null,
+lng9h
+    _sender: null,
+lng9h
+    _socket: null,
+lng9h
+    _bufferedAmount: 0,
+lng9h
+    _isServer: false,
+lng9h
+    _redirects: 0,
+lng9h
+    _autoPong: true,
+lng9h
+    _url: 'wss://dpg-d07cdujuibrs73fc2o20-a/v2',
+lng9h
+    _req: null,
+lng9h
+    [Symbol(shapeMode)]: false,
+lng9h
+    [Symbol(kCapture)]: false
+lng9h
+  },
+lng9h
+  [Symbol(kType)]: 'error',
+lng9h
+  [Symbol(kError)]: Error: connect ECONNREFUSED 10.205.70.246:443
+lng9h
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1634:16) {
+lng9h
+    errno: -111,
+lng9h
+    code: 'ECONNREFUSED',
+lng9h
+    syscall: 'connect',
+lng9h
+    address: '10.205.70.246',
+lng9h
+    port: 443
+lng9h
+  },
+lng9h
+  [Symbol(kMessage)]: 'connect ECONNREFUSED 10.205.70.246:443'
+lng9h
+}
+lng9h
+Registration error: ErrorEvent {
+lng9h
+  [Symbol(kTarget)]: WebSocket {
+lng9h
+    _events: [Object: null prototype] {
+lng9h
+      error: [Function],
+lng9h
+      message: [Function],
+lng9h
+      close: [Function],
+lng9h
+      open: [Function]
+lng9h
+    },
+lng9h
+    _eventsCount: 4,
+lng9h
+    _maxListeners: undefined,
+lng9h
+    _binaryType: 'arraybuffer',
+lng9h
+    _closeCode: 1006,
+lng9h
+    _closeFrameReceived: false,
+lng9h
+    _closeFrameSent: false,
+lng9h
+    _closeMessage: <Buffer >,
+lng9h
+    _closeTimer: null,
+lng9h
+    _errorEmitted: true,
+lng9h
+    _extensions: {},
+lng9h
+    _paused: false,
+lng9h
+    _protocol: '',
+lng9h
+    _readyState: 3,
+lng9h
+    _receiver: null,
+lng9h
+    _sender: null,
+lng9h
+    _socket: null,
+lng9h
+    _bufferedAmount: 0,
+lng9h
+    _isServer: false,
+lng9h
+    _redirects: 0,
+lng9h
+    _autoPong: true,
+lng9h
+    _url: 'wss://dpg-d07cdujuibrs73fc2o20-a/v2',
+lng9h
+    _req: null,
+lng9h
+    [Symbol(shapeMode)]: false,
+lng9h
+    [Symbol(kCapture)]: false
+lng9h
+  },
+lng9h
+  [Symbol(kType)]: 'error',
+lng9h
+  [Symbol(kError)]: Error: connect ECONNREFUSED 10.205.70.246:443
+lng9h
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1634:16) {
+lng9h
+    errno: -111,
+lng9h
+    code: 'ECONNREFUSED',
+lng9h
+    syscall: 'connect',
+lng9h
+    address: '10.205.70.246',
+lng9h
+    port: 443
+lng9h
+  },
+lng9h
+  [Symbol(kMessage)]: 'connect ECONNREFUSED 10.205.70.246:443'
+lng9h
+}
+lng9h
+6:57:06 PM [express] POST /api/auth/register 500 in 4ms :: {"message":"Server error"}
+lng9h
+6:57:13 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
+lng9h
+6:57:47 PM [express] GET /api/auth/me 401 in 1ms :: {"message":"Not authenticated"}
