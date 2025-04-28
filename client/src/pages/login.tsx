@@ -55,9 +55,8 @@ export default function Login() {
         title: "Account created",
         description: "Welcome to NetworkBridge! Redirecting to dashboard...",
       });
-      setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1500);
+      // Redirect immediately to dashboard
+      window.location.href = '/';
     },
     onError: (error: Error) => {
       toast({
