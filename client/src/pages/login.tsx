@@ -55,8 +55,8 @@ export default function Login() {
         title: "Account created",
         description: "Welcome to NetworkBridge! Redirecting to dashboard...",
       });
-      // Redirect immediately to dashboard
-      window.location.href = '/';
+      // Redirect to success page
+      window.location.replace('/login-success');
     },
     onError: (error: Error) => {
       toast({

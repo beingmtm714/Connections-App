@@ -47,6 +47,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/login" component={Login} />
+      <Route path="/login-success" component={LoginSuccess} />
       
       {/* Protected routes */}
       <Route path="/">
