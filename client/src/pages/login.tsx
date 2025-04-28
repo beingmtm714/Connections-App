@@ -26,10 +26,20 @@ export default function Login() {
   const loginMutation = useMutation({
     mutationFn: async (data: FormData) => {
       const res = await apiRequest('POST', '/api/auth/login', data);
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || 'Login failed');
+      }
       return res.json();
     },
     onSuccess: () => {
-      window.location.href = '/';
+      toast({
+        title: "Login successful",
+        description: "Welcome back! Redirecting to dashboard...",
+      });
+      setTimeout(() => {
+        window.location.replace('/');  
+      }, 500);
     },
     onError: (error) => {
       toast({
