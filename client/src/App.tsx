@@ -21,24 +21,26 @@ function Router() {
     refetchOnWindowFocus: true
   });
   
-  // If we're loading, show nothing yet to avoid flashes
+  // Show loading state
   if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  const isAuthenticated = !!user;
+  const isLoginPage = location === '/login';
+
+  // Handle redirects without using window.location
+  if (!isAuthenticated && !isLoginPage) {
+    window.location.replace('/login');
     return null;
   }
 
-  // Check if we're on the login page or authenticated
-  const isAuthenticated = !!user;
-  const isLoginPage = location === '/login';
-  
-  // If not authenticated and not on login page, redirect to login
-  if (!isAuthenticated && !isLoginPage) {
-    window.location.href = '/login';
-    return null;
-  }
-  
-  // If authenticated and on login page, redirect to dashboard
   if (isAuthenticated && isLoginPage) {
-    window.location.href = '/';
+    window.location.replace('/');
     return null;
   }
 
