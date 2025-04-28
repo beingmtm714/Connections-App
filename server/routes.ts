@@ -37,12 +37,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Invalid credentials" });
       }
       
-      // Set user in session
+      // Set user in session and save immediately
       req.session.userId = user.id;
-      
-      // Return user without password
-      const { password: _, ...userWithoutPassword } = user;
-      res.json(userWithoutPassword);
+      req.session.save((err) => {
+        if (err) {
+          console.error('Session save error:', err);
+          return res.status(500).json({ message: "Session error" });
+        }
+        // Return user without password
+        const { password: _, ...userWithoutPassword } = user;
+        res.json(userWithoutPassword);
+      });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Server error" });

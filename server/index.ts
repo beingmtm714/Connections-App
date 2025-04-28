@@ -12,12 +12,14 @@ app.use(express.urlencoded({ extended: false }));
 // Configure session middleware
 app.use(session({
   secret: "networkbridge-session-secret",
-  resave: false,
-  saveUninitialized: false,
+  resave: true,
+  saveUninitialized: true,
   cookie: { 
-    secure: false, // set to true if using https
+    secure: false,
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+  },
+  name: 'networkbridge.sid'
 }));
 
 app.use((req, res, next) => {
